@@ -18,11 +18,12 @@ const API_OPTIONS = {
 function App() {
     const [searchTerm, setSearchTerm] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
-    const [movies, setMovies] = useState([]);
+    const [movies, setMovies] = useState<any[]>([]);
     const [Loading, setLoading] = useState(false);
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
     const [categories, setCategories] = useState([]);
+    const [page, setPage] = useState(1);
 
     useDebounce(() => setDebouncedSearchTerm(searchTerm), 500, [searchTerm]);
 
@@ -39,7 +40,7 @@ function App() {
             ? `${API_URL}/search/movie?query=${encodeURIComponent(
                   debouncedSearchTerm
               )}&with_genres=${selectedCategory}`
-            : `${API_URL}/discover/movie?sort_by=popularity.desc&with_genres=${selectedCategory}`;
+            : `${API_URL}/discover/movie?sort_by=popularity.desc&with_genres=${selectedCategory}&page=${page}`;
         fetch(endpoint, API_OPTIONS)
             .then((response) => {
                 if (!response.ok) {
@@ -53,12 +54,15 @@ function App() {
                     setMovies([]);
                     return;
                 }
-                setMovies(data.results);
-                console.log(data.results);
+                setMovies((prev) => {
+                    console.log(prev)
+                    return [...prev, ...data.results]});    
+                
+                // console.log(data.results);
             })
             .catch((err) => setErrorMessage(err.message))
             .finally(() => setLoading(false));
-    }, [debouncedSearchTerm, selectedCategory]);
+    }, [debouncedSearchTerm, selectedCategory, page]);
     return (
         <main>
             <div className="pattern" />
@@ -72,6 +76,8 @@ function App() {
                     <Search
                         searchTerm={searchTerm}
                         setSearchTerm={setSearchTerm}
+                        setMovies={setMovies}
+                        setPage={setPage}
                     />
                 </header>
 
@@ -82,7 +88,9 @@ function App() {
                         id=""
                         className="text-white bg-purple-900 p-3 rounded-md"
                         onChange={(e) => {
+                            setMovies([]);
                             setSelectedCategory(e.target.value);
+                            setPage(1);
                         }}
                     >
                         <option value="">Select Genre</option>
@@ -98,10 +106,35 @@ function App() {
                         <p className="text-red-500">{errorMessage}</p>
                     ) : (
                         <ul>
-                            {movies.map((movie: any) => (
-                                <MovieCard movie={movie} />
-                            ))}
+                            {movies.map((movie: any) => {
+                                // I added this little filtering here because the api doesn't offer by default filtering by category when searching for a movie
+                                if (
+                                    selectedCategory === "" ||
+                                    movie.genre_ids.includes(
+                                        parseInt(selectedCategory)
+                                    )
+                                ) {
+                                    return <MovieCard movie={movie} />;
+                                } else {
+                                    return;
+                                }
+                            })}
                         </ul>
+                    )}
+                    {movies.length === 0 && !Loading && (
+                        <p className="text-white text-2xl font-bold m-5 text-center">
+                            No Movie Found
+                        </p>
+                    )}
+                    {movies.length >= 20 && (
+                        <div className="mx-auto w-fit">
+                            <button
+                                className="text-white bg-purple-800 p-3 rounded-md text-lg hover:bg-purple-600 cursor-pointer"
+                                onClick={() => setPage((page) => page + 1)}
+                            >
+                                Show More
+                            </button>
+                        </div>
                     )}
                 </section>
             </div>
