@@ -5,9 +5,9 @@ interface Props {
     movie: any;
 }
 
-const MovieCard = forwardRef<HTMLDivElement, Props>(({movie}, ref) => {
+const MovieCard = (({movie} : Props) => {
     return (
-        <div className="movie-card" key={movie.id} ref = {ref}>
+        <div className="movie-card" key={movie.id}>
             <img
                 src={
                     movie.poster_path

@@ -31,6 +31,7 @@ function App() {
     useEffect(() => {
         setMovies([]);
     }, [debouncedSearchTerm, selectedCategory]);
+
     useEffect(() => {
         const categoryAPI = `${API_URL}/genre/movie/list?language=en`;
         fetch(categoryAPI, API_OPTIONS)
@@ -68,21 +69,6 @@ function App() {
             .finally(() => setLoading(false));
     }, [debouncedSearchTerm, selectedCategory, page]);
 
-    const observer = useRef<IntersectionObserver>(null);
-    const lastBookElementRef = useCallback((node :HTMLElement | null) => {
-        console.log("heeeey")
-        if (Loading) return;
-        if (observer.current) observer.current.disconnect()
-        
-        observer.current = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting && hasMore){
-                setPage(prev => prev + 1)
-            }
-        })
-        if (node) observer.current.observe(node);
-
-    }, [Loading, hasMore]);
-
     return (
         <main>
             <div className="pattern" />
@@ -118,42 +104,44 @@ function App() {
                             </option>
                         ))}
                     </select>
-                    {Loading ? (
-                        <Spinner />
-                    ) : errorMessage ? (
+
+                    <ul>
+                        {movies.map((movie) => {
+                            // I added this little filtering here because the api doesn't offer by default filtering by category when searching for a movie
+                            if (
+                                selectedCategory === "" ||
+                                movie.genre_ids.includes(
+                                    parseInt(selectedCategory)
+                                )
+                            ) {
+                                return <MovieCard movie={movie} />;
+                            } else {
+                                return;
+                            }
+                        })}
+                    </ul>
+
+                    {Loading && <Spinner />}
+                    {errorMessage && (
                         <p className="text-red-500">{errorMessage}</p>
-                    ) : (
-                        <ul>
-                            {movies.map((movie, index) => {
-                                // I added this little filtering here because the api doesn't offer by default filtering by category when searching for a movie
-                                if (
-                                    selectedCategory === "" ||
-                                    movie.genre_ids.includes(
-                                        parseInt(selectedCategory)
-                                    )
-                                ) {
-                                    return <MovieCard movie={movie} ref={movies.length === index + 1 ? lastBookElementRef : null}/>
-                                } else {
-                                    return;
-                                }
-                            })}
-                        </ul>
                     )}
+
                     {movies.length === 0 && !Loading && (
                         <p className="text-white text-2xl font-bold m-5 text-center">
                             No Movie Found
                         </p>
                     )}
-                    {/* {movies.length >= 20 && (
+                    {movies.length >= 20 && (
                         <div className="mx-auto w-fit">
                             <button
+                                disabled = {!hasMore}
                                 className="text-white bg-purple-800 p-3 rounded-md text-lg hover:bg-purple-600 cursor-pointer"
                                 onClick={() => setPage((page) => page + 1)}
                             >
-                                Show More       
+                                Show More
                             </button>
                         </div>
-                    )} */}
+                    )}
                 </section>
             </div>
         </main>
