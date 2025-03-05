@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Search from "./components/Search";
 import Spinner from "./components/Spinner";
 import MovieCard from "./components/MovieCard";
@@ -24,12 +24,13 @@ function App() {
     const [selectedCategory, setSelectedCategory] = useState("");
     const [categories, setCategories] = useState([]);
     const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
 
     useDebounce(() => setDebouncedSearchTerm(searchTerm), 500, [searchTerm]);
 
     useEffect(() => {
         setMovies([]);
-    }, [debouncedSearchTerm, selectedCategory])
+    }, [debouncedSearchTerm, selectedCategory]);
     useEffect(() => {
         const categoryAPI = `${API_URL}/genre/movie/list?language=en`;
         fetch(categoryAPI, API_OPTIONS)
@@ -59,13 +60,29 @@ function App() {
                     return;
                 }
                 setMovies((prev) => {
-                    console.log(prev);
                     return [...prev, ...data.results];
                 });
+                setHasMore(data.results.length > 0);
             })
             .catch((err) => setErrorMessage(err.message))
             .finally(() => setLoading(false));
     }, [debouncedSearchTerm, selectedCategory, page]);
+
+    const observer = useRef<IntersectionObserver>(null);
+    const lastBookElementRef = useCallback((node :HTMLElement | null) => {
+        console.log("heeeey")
+        if (Loading) return;
+        if (observer.current) observer.current.disconnect()
+        
+        observer.current = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && hasMore){
+                setPage(prev => prev + 1)
+            }
+        })
+        if (node) observer.current.observe(node);
+
+    }, [Loading, hasMore]);
+
     return (
         <main>
             <div className="pattern" />
@@ -107,7 +124,7 @@ function App() {
                         <p className="text-red-500">{errorMessage}</p>
                     ) : (
                         <ul>
-                            {movies.map((movie: any) => {
+                            {movies.map((movie, index) => {
                                 // I added this little filtering here because the api doesn't offer by default filtering by category when searching for a movie
                                 if (
                                     selectedCategory === "" ||
@@ -115,7 +132,7 @@ function App() {
                                         parseInt(selectedCategory)
                                     )
                                 ) {
-                                    return <MovieCard movie={movie} />;
+                                    return <MovieCard movie={movie} ref={movies.length === index + 1 ? lastBookElementRef : null}/>
                                 } else {
                                     return;
                                 }
@@ -127,16 +144,16 @@ function App() {
                             No Movie Found
                         </p>
                     )}
-                    {movies.length >= 20 && (
+                    {/* {movies.length >= 20 && (
                         <div className="mx-auto w-fit">
                             <button
                                 className="text-white bg-purple-800 p-3 rounded-md text-lg hover:bg-purple-600 cursor-pointer"
                                 onClick={() => setPage((page) => page + 1)}
                             >
-                                Show More
+                                Show More       
                             </button>
                         </div>
-                    )}
+                    )} */}
                 </section>
             </div>
         </main>
