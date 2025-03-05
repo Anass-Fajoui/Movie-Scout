@@ -28,12 +28,16 @@ function App() {
     useDebounce(() => setDebouncedSearchTerm(searchTerm), 500, [searchTerm]);
 
     useEffect(() => {
+        setMovies([]);
+    }, [debouncedSearchTerm, selectedCategory])
+    useEffect(() => {
         const categoryAPI = `${API_URL}/genre/movie/list?language=en`;
         fetch(categoryAPI, API_OPTIONS)
             .then((res) => res.json())
             .then((data) => setCategories(data.genres))
             .catch((err) => console.log(err.message));
     }, []);
+
     useEffect(() => {
         setLoading(true);
         const endpoint = debouncedSearchTerm
@@ -55,10 +59,9 @@ function App() {
                     return;
                 }
                 setMovies((prev) => {
-                    console.log(prev)
-                    return [...prev, ...data.results]});    
-                
-                // console.log(data.results);
+                    console.log(prev);
+                    return [...prev, ...data.results];
+                });
             })
             .catch((err) => setErrorMessage(err.message))
             .finally(() => setLoading(false));
@@ -76,7 +79,6 @@ function App() {
                     <Search
                         searchTerm={searchTerm}
                         setSearchTerm={setSearchTerm}
-                        setMovies={setMovies}
                         setPage={setPage}
                     />
                 </header>
@@ -88,7 +90,6 @@ function App() {
                         id=""
                         className="text-white bg-purple-900 p-3 rounded-md"
                         onChange={(e) => {
-                            setMovies([]);
                             setSelectedCategory(e.target.value);
                             setPage(1);
                         }}

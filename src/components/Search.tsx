@@ -2,11 +2,11 @@
 
 interface Props {
     setSearchTerm: (n: string) => void;
-    setMovies: (a : any[]) => void;
+    // setMovies: (a : any[]) => void;
     setPage : (a : number) => void;
     searchTerm: string;
 }
-const Search = ({ searchTerm, setSearchTerm, setPage, setMovies }: Props) => {
+const Search = ({ searchTerm, setSearchTerm, setPage}: Props) => {
     return (
         <div className="search">
             <div>
@@ -16,7 +16,6 @@ const Search = ({ searchTerm, setSearchTerm, setPage, setMovies }: Props) => {
                     placeholder="Search through thousands of movie"
                     value={searchTerm}
                     onChange={(e) => {
-                        setMovies([]);
                         setPage(1);
                         setSearchTerm(e.target.value);
                     }}
