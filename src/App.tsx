@@ -28,6 +28,10 @@ function App() {
 
     useDebounce(() => setDebouncedSearchTerm(searchTerm), 500, [searchTerm]);
 
+    useEffect(()=>{
+        fetch("http://localhost:3000/").then(res => res.json()).then(data => console.log(data))
+    }, [])
+
     useEffect(() => {
         setMovies([]);
     }, [debouncedSearchTerm, selectedCategory]);
@@ -131,7 +135,7 @@ function App() {
                             No Movie Found
                         </p>
                     )}
-                    {movies.length >= 20 && (
+                    {movies.length >= 20 && !Loading && (
                         <div className="mx-auto w-fit">
                             <button
                                 disabled = {!hasMore}
