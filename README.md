@@ -15,3 +15,7 @@ A responsive web application that helps users discover and explore movies using 
 
 - **Frontend**: HTML, CSS, JavaScript, React
 - **API**: TMDB (The Movie Database) API
+
+## Hosted Version
+You can access the live version of the project on **GitHub Pages**:
+[https://anass-fajoui.github.io/Currency-Converter/](https://anass-fajoui.github.io/Currency-Converter/)
