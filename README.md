@@ -18,4 +18,4 @@ A responsive web application that helps users discover and explore movies using 
 
 ## Hosted Version
 You can access the live version of the project on **GitHub Pages**:
-[Movie Scout](https://anass-fajoui.github.io/Movie-Scout/)
+[Movie Scout](https://movie-scout2-naeog67cj-anasslpros-projects.vercel.app/)
