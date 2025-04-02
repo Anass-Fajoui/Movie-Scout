@@ -1,12 +1,12 @@
 {
-  "home" : "https://anass-fajoui.github.io/Movie-Scout",
+  "home": "https://anass-fajoui.github.io/Movie-Scout",
   "name": "movie-app",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "npm run build",
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
